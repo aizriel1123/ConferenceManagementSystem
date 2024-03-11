@@ -348,9 +348,6 @@
         }
 
 
-
-
-
         public static void updateEventParticipants(int eventID, List<Participant> participants) throws SQLException {
             Connection connection = null;
             PreparedStatement statement = null;
