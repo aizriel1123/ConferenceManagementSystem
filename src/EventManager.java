@@ -67,6 +67,7 @@ public class EventManager {
     }
 
     // Method to create a new event
+    // Method to create a new event
     private static void createEvent(Scanner scanner) {
         try {
             System.out.println("+-----------------------------------------+");
@@ -132,6 +133,7 @@ public class EventManager {
         }
     }
 
+
     // Method to update an event
     private static void updateEvent(Scanner scanner) {
         try {
@@ -192,6 +194,7 @@ public class EventManager {
             e.printStackTrace();
         }
     }
+
 
 
 
@@ -264,7 +267,10 @@ public class EventManager {
                     do {
                         System.out.print("Enter updated Participant Email (Press Enter to keep current value): ");
                         participantEmail = scanner.nextLine();
-                    } while (!isValidEmail(participantEmail) && !participantEmail.isEmpty());
+                        if (!participantEmail.isEmpty() && !isValidEmail(participantEmail)) {
+                            throw new IllegalArgumentException("Invalid email format. Please enter a valid email or leave it empty.");
+                        }
+                    } while (!participantEmail.isEmpty() && !isValidEmail(participantEmail));
 
                     // Update participant in the event's participant list and the database
                     String updatedName = participantName.isEmpty() ? participantToEdit.getParticipantName() : participantName;
@@ -280,11 +286,12 @@ public class EventManager {
             } else {
                 System.out.println("Event not found!");
             }
-        } catch (InputMismatchException | SQLException e) {
+        } catch (InputMismatchException | IllegalArgumentException | SQLException e) {
             System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
 
 
     // Method to register a participant for an event
@@ -310,6 +317,9 @@ public class EventManager {
 
                 System.out.print("Enter Participant Email (optional): ");
                 String participantEmail = scanner.nextLine();
+                if (!participantEmail.isEmpty() && !isValidEmail(participantEmail)) {
+                    throw new IllegalArgumentException("Invalid email format. Please enter a valid email or leave it empty.");
+                }
 
                 // Check if the participant is already registered for the event
                 List<Participant> existingParticipants = event.getParticipants();
@@ -339,6 +349,7 @@ public class EventManager {
             e.printStackTrace();
         }
     }
+
 
     // Method to remove a participant from an event
     private static void removeParticipant(Scanner scanner) {
@@ -462,6 +473,8 @@ public class EventManager {
             System.out.println("+-----------------------------------------+");
             System.out.println("|      Find Participants for Event        |");
             System.out.println("+-----------------------------------------+");
+            List<Event> events = Database.getEvents();
+            displayEventTable(events);
             System.out.print("Enter the ID of the event to find participants for: ");
             int eventID = scanner.nextInt();
             scanner.nextLine(); // Consume newline
