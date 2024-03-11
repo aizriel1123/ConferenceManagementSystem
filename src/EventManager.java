@@ -1,82 +1,77 @@
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
-public class Main {
+public class EventManager {
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
-        boolean running = true;
-        while (running) {
-            try {
-                System.out.println("");
-                System.out.println("Choose an option:");
-                System.out.println("+----+-------------------------+");
-                System.out.println("| 1. | Create new event        |");
-                System.out.println("| 2. | View all events         |");
-                System.out.println("| 3. | Update an event         |");
-                System.out.println("| 4. | Delete an event         |");
-                System.out.println("| 5. | Edit Participants       |");
-                System.out.println("| 6. | Register a participant  |");
-                System.out.println("| 7. | Remove a participant    |");
-                System.out.println("| 8. | Search for an event     |");
-                System.out.println("| 9. | Search for a Participant|");
-                System.out.println("| 10.| Exit                    |");
-                System.out.println("+----+-------------------------+");
-                System.out.print("Enter your choice: ");
-
-
-                int choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
-
-                switch (choice) {
-                    case 1:
-                        createEvent(scanner);
-                        break;
-                    case 2:
-                        viewAllEvents();
-                        break;
-                    case 3:
-                        updateEvent(scanner);
-                        break;
-                    case 4:
-                        deleteEvent(scanner);
-                        break;
-                    case 5:
-                        editEventParticipants(scanner);
-                        break;
-                    case 6:
-                        registerParticipant(scanner);
-                        break;
-                    case 7:
-                        removeParticipant(scanner);
-                        break;
-                    case 8:
-                        searchEvent(scanner);
-                        break;
-                    case 9:
-                        findParticipants(scanner);
-                        break;
-                    case 10:
-                        running = false;
-                        break;
-                    default:
-                        System.out.println("Invalid choice. Please enter a number between 1 and 10.");
-                }
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
-                scanner.nextLine(); // Clear the invalid input from the scanner
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("Welcome to Event Manager!");
+            System.out.println("+---------------------------------------------+");
+            System.out.println("|                  Main Menu                  |");
+            System.out.println("+---------------------------------------------+");
+            System.out.println("| Option |             Description            |");
+            System.out.println("+--------+------------------------------------+");
+            System.out.println("|   1    |          Create Event              |");
+            System.out.println("|   2    |          Update Event              |");
+            System.out.println("|   3    |          Delete Event              |");
+            System.out.println("|   4    |    Edit Event Participants         |");
+            System.out.println("|   5    |      Register Participant          |");
+            System.out.println("|   6    |       Remove Participant           |");
+            System.out.println("|   7    |          Search Event              |");
+            System.out.println("|   8    |        View All Events             |");
+            System.out.println("|   9    |    Find Participants for Event     |");
+            System.out.println("|   10   |               Exit                 |");
+            System.out.println("+--------+------------------------------------+");
+            System.out.print("Choose an option: ");
+            int option = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+            switch (option) {
+                case 1:
+                    createEvent(scanner);
+                    break;
+                case 2:
+                    updateEvent(scanner);
+                    break;
+                case 3:
+                    deleteEvent(scanner);
+                    break;
+                case 4:
+                    editEventParticipants(scanner);
+                    break;
+                case 5:
+                    registerParticipant(scanner);
+                    break;
+                case 6:
+                    removeParticipant(scanner);
+                    break;
+                case 7:
+                    searchEvent(scanner);
+                    break;
+                case 8:
+                    viewAllEvents();
+                    break;
+                case 9:
+                    findParticipants(scanner);
+                    break;
+                case 10:
+                    exit = true;
+                    System.out.println("Exiting Event Manager. Goodbye!");
+                    break;
+                default:
+                    System.out.println("Invalid option. Please try again.");
             }
         }
-
         scanner.close();
     }
 
     // Method to create a new event
     private static void createEvent(Scanner scanner) {
         try {
+            System.out.println("+-----------------------------------------+");
+            System.out.println("|            Create New Event             |");
+            System.out.println("+-----------------------------------------+");
             System.out.print("Enter Event Title: ");
             String eventTitle = scanner.nextLine();
             if (eventTitle.isEmpty()) {
@@ -107,6 +102,9 @@ public class Main {
                 if (addParticipantChoice.equals("n")) {
                     addingParticipants = false;
                 } else if (addParticipantChoice.equals("y")) {
+                    System.out.println("+-------------------------------------+");
+                    System.out.println("|         Add New Participant         |");
+                    System.out.println("+-------------------------------------+");
                     System.out.print("Enter Participant Name: ");
                     String participantName = scanner.nextLine();
                     if (participantName.isEmpty()) {
@@ -137,7 +135,12 @@ public class Main {
     // Method to update an event
     private static void updateEvent(Scanner scanner) {
         try {
-            System.out.print("Enter the ID of the event you want to update: ");
+            System.out.println("+-----------------------------------------+");
+            System.out.println("|             Update Event                |");
+            System.out.println("+-----------------------------------------+");
+            System.out.println("Enter the ID of the event you want to update:");
+            displayEventTable(Database.getEvents());
+            System.out.print("Choose an option: ");
             int eventID = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
@@ -146,7 +149,7 @@ public class Main {
                 System.out.println("+----+------------------------+");
                 System.out.println("| ID |         Event          |");
                 System.out.println("+----+------------------------+");
-                System.out.println("| " + eventID + "  | " + event.getEventTitle() + " |");
+                System.out.printf("| %-3d| %-22s|%n", eventID, event.getEventTitle());
                 System.out.println("+----+------------------------+");
 
                 System.out.print("Enter updated Event Title (Press Enter to keep current value): ");
@@ -171,11 +174,12 @@ public class Main {
                 if (!eventDate.isEmpty()) {
                     event.setEventDate(eventDate);
                 }
-                // Always update eventDescription
-                event.setEventDescription(eventDescription);
-
                 if (!eventLocation.isEmpty()) {
                     event.setEventLocation(eventLocation);
+                }
+                // Update description only if provided
+                if (!eventDescription.isEmpty()) {
+                    event.setEventDescription(eventDescription);
                 }
 
                 Database.updateEvent(event);
@@ -190,10 +194,16 @@ public class Main {
     }
 
 
+
     // Method to delete an event
     private static void deleteEvent(Scanner scanner) {
         try {
-            System.out.print("Enter the ID of the event you want to delete: ");
+            System.out.println("+-----------------------------------------+");
+            System.out.println("|             Delete Event                |");
+            System.out.println("+-----------------------------------------+");
+            System.out.println("Enter the ID of the event you want to delete:");
+            displayEventTable(Database.getEvents());
+            System.out.print("Choose an option: ");
             int eventID = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
@@ -215,45 +225,29 @@ public class Main {
         }
     }
 
+
     // Method to edit participants of an event
     private static void editEventParticipants(Scanner scanner) {
         try {
-            // Display all events (ID and title)
-            System.out.println("Available Events:");
-            System.out.println("+----+---------------------+");
-            System.out.println("| ID |      Event Title    |");
-            System.out.println("+----+---------------------+");
-            List<Event> events = Database.getEvents();
-            for (Event event : events) {
-                System.out.printf("| %-3d| %-20s|%n", event.getEventID(), event.getEventTitle());
-            }
-            System.out.println("+----+---------------------+");
-
-            System.out.print("Enter the ID of the event you want to edit participants for: ");
+            System.out.println("+-----------------------------------------+");
+            System.out.println("|      Edit Event Participants            |");
+            System.out.println("+-----------------------------------------+");
+            System.out.println("Enter the ID of the event you want to edit participants for:");
+            displayEventTable(Database.getEvents());
+            System.out.print("Choose an option: ");
             int eventID = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
             Event event = Database.getEventByID(eventID);
             if (event != null) {
-                // Display participants table for the specified event
-                System.out.println("Participants for Event ID " + eventID + ":");
-                System.out.println("+----+----------------------+----------------------+");
-                System.out.println("| ID |     Participant      |    Participant Email |");
-                System.out.println("+----+----------------------+----------------------+");
-                List<Participant> participants = event.getParticipants();
-                for (Participant participant : participants) {
-                    System.out.printf("| %-3d| %-20s| %-20s|%n",
-                            participant.getParticipantID(), participant.getParticipantName(), participant.getParticipantEmail());
-                }
-                System.out.println("+----+----------------------+----------------------+");
-
+                displayParticipantsTable(event.getParticipants());
                 System.out.print("Enter the ID of the participant you want to edit: ");
                 int participantID = scanner.nextInt();
                 scanner.nextLine(); // Consume newline
 
                 // Find the participant to edit
                 Participant participantToEdit = null;
-                for (Participant participant : participants) {
+                for (Participant participant : event.getParticipants()) {
                     if (participant.getParticipantID() == participantID) {
                         participantToEdit = participant;
                         break;
@@ -262,18 +256,15 @@ public class Main {
 
                 if (participantToEdit != null) {
                     System.out.println("Editing Participant:");
-                    System.out.println("+----+----------------------+----------------------+");
-                    System.out.println("| ID |   Participant Name   |    Participant Email |");
-                    System.out.println("+----+----------------------+----------------------+");
-                    System.out.printf("| %-3d| %-20s| %-20s|%n",
-                            participantToEdit.getParticipantID(), participantToEdit.getParticipantName(), participantToEdit.getParticipantEmail());
-                    System.out.println("+----+----------------------+----------------------+");
-
+                    displayParticipantTable(participantToEdit);
                     System.out.print("Enter updated Participant Name (Press Enter to keep current value): ");
                     String participantName = scanner.nextLine();
 
-                    System.out.print("Enter updated Participant Email (Press Enter to keep current value): ");
-                    String participantEmail = scanner.nextLine();
+                    String participantEmail;
+                    do {
+                        System.out.print("Enter updated Participant Email (Press Enter to keep current value): ");
+                        participantEmail = scanner.nextLine();
+                    } while (!isValidEmail(participantEmail) && !participantEmail.isEmpty());
 
                     // Update participant in the event's participant list and the database
                     String updatedName = participantName.isEmpty() ? participantToEdit.getParticipantName() : participantName;
@@ -299,24 +290,18 @@ public class Main {
     // Method to register a participant for an event
     private static void registerParticipant(Scanner scanner) {
         try {
-            // Display all events (ID and title)
+            System.out.println("+-----------------------------------------+");
+            System.out.println("|        Register New Participant         |");
+            System.out.println("+-----------------------------------------+");
             System.out.println("Available Events:");
-            System.out.println("+----+---------------------+");
-            System.out.println("| ID |      Event Title    |");
-            System.out.println("+----+---------------------+");
             List<Event> events = Database.getEvents();
-            for (Event event : events) {
-                System.out.printf("| %-3d| %-20s|%n", event.getEventID(), event.getEventTitle());
-            }
-            System.out.println("+----+---------------------+");
-
+            displayEventTable(events);
             System.out.print("Enter the ID of the event you want to register a participant for: ");
             int eventID = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
             Event event = Database.getEventByID(eventID);
             if (event != null) {
-                // Proceed with participant registration
                 System.out.print("Enter Participant Name: ");
                 String participantName = scanner.nextLine();
                 if (participantName.isEmpty()) {
@@ -355,37 +340,22 @@ public class Main {
         }
     }
 
-
     // Method to remove a participant from an event
     private static void removeParticipant(Scanner scanner) {
         try {
+            System.out.println("+-----------------------------------------+");
+            System.out.println("|      Remove Participant From Event      |");
+            System.out.println("+-----------------------------------------+");
+            System.out.println("Available Events:");
+            List<Event> events = Database.getEvents();
+            displayEventTable(events);
             System.out.print("Enter the ID of the event you want to remove a participant from: ");
             int eventID = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
             Event event = Database.getEventByID(eventID);
             if (event != null) {
-                // Display event details (only ID and title)
-                System.out.println("Event Details:");
-                System.out.println("+----+---------------------+");
-                System.out.println("| ID |      Event Title    |");
-                System.out.println("+----+---------------------+");
-                System.out.printf("| %-3d| %-20s|%n", event.getEventID(), event.getEventTitle());
-                System.out.println("+----+---------------------+");
-
-                // Display participants table for the specified event
-                System.out.println("Participants for Event ID " + eventID + ":");
-                System.out.println("+----+----------------------+----------------------+");
-                System.out.println("| ID |     Participant      |    Participant Email |");
-                System.out.println("+----+----------------------+----------------------+");
-                List<Participant> participants = event.getParticipants();
-                for (Participant participant : participants) {
-                    System.out.printf("| %-3d| %-20s| %-20s|%n",
-                            participant.getParticipantID(), participant.getParticipantName(), participant.getParticipantEmail());
-                }
-                System.out.println("+----+----------------------+----------------------+");
-
-                // Prompt for participant ID to remove
+                displayEventDetails(event);
                 System.out.print("Enter the ID of the participant you want to remove: ");
                 int participantID = scanner.nextInt();
                 scanner.nextLine(); // Consume newline
@@ -408,11 +378,12 @@ public class Main {
         }
     }
 
-
-
     // Method to search for an event
     private static void searchEvent(Scanner scanner) {
         try {
+            System.out.println("+-----------------------------------------+");
+            System.out.println("|             Search Event                |");
+            System.out.println("+-----------------------------------------+");
             System.out.println("Enter search criteria:");
             System.out.println("1. Search by title");
             System.out.println("2. Search by date");
@@ -456,27 +427,8 @@ public class Main {
 
             if (!searchResults.isEmpty()) {
                 System.out.println("Search Results:");
-                System.out.println("+----------------------+------------------+------------------+");
-                System.out.println("| Event Title          | Event Date       | Event Location   |");
-                System.out.println("+----------------------+------------------+------------------+");
-                for (Event result : searchResults) {
-                    System.out.printf("| %-20s| %-16s| %-16s|%n",
-                            result.getEventTitle(), result.getEventDate(), result.getEventLocation());
-                }
-                System.out.println("+----------------------+------------------+------------------+");
-
-                // Display participants for each event in the search results
-                for (Event result : searchResults) {
-                    System.out.println("Participants:");
-                    System.out.println("+----------------------+");
-                    System.out.println("|     Participant      |");
-                    System.out.println("+----------------------+");
-                    List<Participant> participants = result.getParticipants();
-                    for (Participant participant : participants) {
-                        System.out.printf("| %-20s|%n", participant.getParticipantName());
-                    }
-                    System.out.println("+----------------------+");
-                }
+                displaySearchResults(searchResults);
+                displayParticipantsForSearchResults(searchResults);
             } else {
                 System.out.println("No events found matching the search criteria.");
             }
@@ -486,31 +438,6 @@ public class Main {
         }
     }
 
-
-    private static void printEventInfoWithParticipants(Event event) {
-        System.out.println("+----------------------+------------------+------------------+");
-        System.out.println("| Event Title          | Event Date       | Event Location   |");
-        System.out.println("+----------------------+------------------+------------------+");
-        System.out.printf("| %-20s | %-16s | %-16s |%n",
-                event.getEventTitle(), event.getEventDate(), event.getEventLocation());
-        System.out.println("+----------------------+------------------+------------------+");
-        System.out.println("| Participants                                          |");
-        System.out.println("+-------------------------------------------------------+");
-        for (Participant participant : event.getParticipants()) {
-            System.out.printf("| %-53s |%n", participant.getParticipantName());
-        }
-        System.out.println("+-------------------------------------------------------+");
-    }
-
-
-    // Method to validate email format
-    private static boolean isValidEmail(String email) {
-        if (email.isEmpty()) {
-            return true;
-        }
-        return email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$");
-    }
-    // Method to view all events
     public static void viewAllEvents() {
         try {
             List<Event> events = Database.getEvents();
@@ -532,6 +459,9 @@ public class Main {
     // Method to find participants for an event
     private static void findParticipants(Scanner scanner) {
         try {
+            System.out.println("+-----------------------------------------+");
+            System.out.println("|      Find Participants for Event        |");
+            System.out.println("+-----------------------------------------+");
             System.out.print("Enter the ID of the event to find participants for: ");
             int eventID = scanner.nextInt();
             scanner.nextLine(); // Consume newline
@@ -539,15 +469,7 @@ public class Main {
             Event event = Database.getEventByID(eventID);
             if (event != null) {
                 List<Participant> participants = Database.getParticipantsByEventID(eventID);
-                System.out.println("+----+----------------------+-------------------+");
-                System.out.println("| ID |    Participant Name  |  Participant Email|");
-                System.out.println("+----+----------------------+-------------------+");
-                for (Participant participant : participants) {
-                    System.out.printf("| %-3d| %-20s| %-18s|%n",
-                            participant.getParticipantID(), participant.getParticipantName(),
-                            participant.getParticipantEmail());
-                }
-                System.out.println("+----+----------------------+-------------------+");
+                displayParticipantsTable(participants);
             } else {
                 System.out.println("Event not found!");
             }
@@ -557,20 +479,216 @@ public class Main {
         }
     }
 
+    // Method to display event details
+    private static void displayEventDetails(Event event) {
+        System.out.println("Event Details:");
+        System.out.println("+----+---------------------+");
+        System.out.println("| ID |      Event Title    |");
+        System.out.println("+----+---------------------+");
+        System.out.printf("| %-3d| %-20s|%n", event.getEventID(), event.getEventTitle());
+        System.out.println("+----+---------------------+");
+    }
 
-    // Method to check if a participant belongs to a specific event
-    private static boolean participantBelongsToEvent(Participant participant, int eventID) throws SQLException {
-        List<Event> events = Database.getEvents();
+    // Method to display a table of events
+    private static void displayEventTable(List<Event> events) {
+        System.out.println("+----+---------------------+");
+        System.out.println("| ID |      Event Title    |");
+        System.out.println("+----+---------------------+");
         for (Event event : events) {
-            if (event.getEventID() == eventID) {
-                List<Participant> eventParticipants = event.getParticipants();
-                for (Participant eventParticipant : eventParticipants) {
-                    if (eventParticipant.getParticipantID() == participant.getParticipantID()) {
-                        return true;
-                    }
-                }
+            System.out.printf("| %-3d| %-20s|%n", event.getEventID(), event.getEventTitle());
+        }
+        System.out.println("+----+---------------------+");
+    }
+
+    // Method to display participants table for an event
+    private static void displayParticipantsTable(List<Participant> participants) {
+        System.out.println("Participants:");
+        System.out.println("+----+----------------------+----------------------+");
+        System.out.println("| ID |     Participant      |    Participant Email |");
+        System.out.println("+----+----------------------+----------------------+");
+        for (Participant participant : participants) {
+            System.out.printf("| %-3d| %-20s| %-20s|%n",
+                    participant.getParticipantID(), participant.getParticipantName(), participant.getParticipantEmail());
+        }
+        System.out.println("+----+----------------------+----------------------+");
+    }
+
+    // Method to display a participant table
+    private static void displayParticipantTable(Participant participant) {
+        System.out.println("Editing Participant:");
+        System.out.println("+----+----------------------+----------------------+");
+        System.out.println("| ID |   Participant Name   |    Participant Email |");
+        System.out.println("+----+----------------------+----------------------+");
+        System.out.printf("| %-3d| %-20s| %-20s|%n",
+                participant.getParticipantID(), participant.getParticipantName(), participant.getParticipantEmail());
+        System.out.println("+----+----------------------+----------------------+");
+    }
+
+    // Method to display search results
+    private static void displaySearchResults(List<Event> searchResults) {
+        System.out.println("+----------------------+------------------+------------------+");
+        System.out.println("| Event Title          | Event Date       | Event Location   |");
+        System.out.println("+----------------------+------------------+------------------+");
+        for (Event result : searchResults) {
+            System.out.printf("| %-20s| %-16s| %-16s|%n",
+                    result.getEventTitle(), result.getEventDate(), result.getEventLocation());
+        }
+        System.out.println("+----------------------+------------------+------------------+");
+    }
+
+    // Method to display participants for search results
+    private static void displayParticipantsForSearchResults(List<Event> searchResults) {
+        for (Event result : searchResults) {
+            System.out.println("Participants:");
+            displayParticipantsTable(result.getParticipants());
+        }
+    }
+
+    private static boolean isValidEmail(String email) throws IllegalArgumentException {
+        if (email.isEmpty()) {
+            return true;
+        }
+        if (email.matches("^[a-zA-Z0-9_+&*-]+@(gmail|yahoo|outlook|hotmail)\\.com$")) {
+            return true;
+        } else {
+            throw new IllegalArgumentException("Invalid email format. Only domains like @gmail.com, @yahoo.com, @outlook.com, and @hotmail.com are allowed.");
+        }
+    }
+
+
+}
+
+
+class Event {
+    private int eventID;
+    private String eventTitle;
+    private String eventDate;
+    private String eventLocation;
+    private String eventDescription;
+    private List<Participant> participants;
+
+    // Constructors
+    public Event(String eventTitle, String eventDate, String eventLocation, String eventDescription) {
+        this.eventTitle = eventTitle;
+        this.eventDate = eventDate;
+        this.eventLocation = eventLocation;
+        this.eventDescription = eventDescription;
+        this.participants = new ArrayList<>();
+    }
+
+    public Event(int eventID, String eventTitle, String eventDate, String eventLocation, String eventDescription) {
+        this.eventID = eventID;
+        this.eventTitle = eventTitle;
+        this.eventDate = eventDate;
+        this.eventLocation = eventLocation;
+        this.eventDescription = eventDescription;
+        this.participants = new ArrayList<>();
+    }
+
+    // Getter and Setter methods
+    public int getEventID() {
+        return eventID;
+    }
+
+    public String getEventTitle() {
+        return eventTitle;
+    }
+
+    public String getEventDate() {
+        return eventDate;
+    }
+
+    public String getEventLocation() {
+        return eventLocation;
+    }
+
+    public String getEventDescription() {
+        return eventDescription;
+    }
+
+    public List<Participant> getParticipants() {
+        return participants;
+    }
+
+    public void setEventTitle(String eventTitle) {
+        this.eventTitle = eventTitle;
+    }
+
+    public void setEventDate(String eventDate) {
+        this.eventDate = eventDate;
+    }
+
+    public void setEventLocation(String eventLocation) {
+        this.eventLocation = eventLocation;
+    }
+
+    public void setEventDescription(String eventDescription) {
+        this.eventDescription = eventDescription;
+    }
+
+    public void setParticipants(List<Participant> participants) {
+        this.participants = participants;
+    }
+
+    // Methods to manage participants
+    public void addParticipant(Participant participant) {
+        participants.add(participant);
+    }
+
+    public void removeParticipant(int participantID) {
+        for (Participant participant : participants) {
+            if (participant.getParticipantID() == participantID) {
+                participants.remove(participant);
+                return;
             }
         }
-        return false;
+    }
+
+    public void updateParticipant(Participant updatedParticipant) {
+        for (int i = 0; i < participants.size(); i++) {
+            Participant participant = participants.get(i);
+            if (participant.getParticipantID() == updatedParticipant.getParticipantID()) {
+                participants.set(i, updatedParticipant);
+                return;
+            }
+        }
+    }
+}
+
+class Participant {
+    private int participantID;
+    private String participantName;
+    private String participantEmail;
+
+    // Constructor
+    public Participant(int participantID, String participantName, String participantEmail) {
+        this.participantID = participantID;
+        this.participantName = participantName;
+        this.participantEmail = participantEmail;
+    }
+
+    // Getter and Setter methods
+    public int getParticipantID() {
+        return participantID;
+    }
+
+    public String getParticipantName() {
+        return participantName;
+    }
+
+    public void setParticipantName(String participantName) {
+        this.participantName = participantName;
+    }
+
+    public String getParticipantEmail() {
+        return participantEmail;
+    }
+
+    public void setParticipantEmail(String participantEmail) {
+        this.participantEmail = participantEmail;
+    }
+
+    public void setParticipantID(int participantID) {
+        this.participantID = participantID;
     }
 }
