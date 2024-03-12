@@ -593,15 +593,16 @@ public class EventManager {
 
     // Method to display search results
     private static void displaySearchResults(List<Event> searchResults) {
-        System.out.println("+----------------------+------------------+------------------+");
-        System.out.println("| Event Title          | Event Date       | Event Location   |");
-        System.out.println("+----------------------+------------------+------------------+");
+        System.out.println("+----------------------+------------------+------------------+------------------------+");
+        System.out.println("| Event Title          | Event Date       | Event Location   | Event Description       |");
+        System.out.println("+----------------------+------------------+------------------+------------------------+");
         for (Event result : searchResults) {
-            System.out.printf("| %-20s| %-16s| %-16s|%n",
-                    result.getEventTitle(), result.getEventDate(), result.getEventLocation());
+            System.out.printf("| %-20s| %-16s| %-16s| %-24s|%n",
+                    result.getEventTitle(), result.getEventDate(), result.getEventLocation(), result.getEventDescription());
         }
-        System.out.println("+----------------------+------------------+------------------+");
+        System.out.println("+----------------------+------------------+------------------+------------------------+");
     }
+
 
     // Method to display participants for search results
     private static void displayParticipantsForSearchResults(List<Event> searchResults) {
