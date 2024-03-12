@@ -35,7 +35,7 @@
             return events;
         }
 
-        public static void addEventData(Event event) throws SQLException {
+        public static int addEventData(Event event) throws SQLException {
             Connection connection = null;
             PreparedStatement eventStatement = null;
             PreparedStatement participantStatement = null;
@@ -69,6 +69,8 @@
                 participantStatement.executeBatch();
 
                 connection.commit();
+
+                return eventId; // Return the generated event ID
             } catch (SQLException e) {
                 if (connection != null) {
                     connection.rollback();
@@ -87,6 +89,7 @@
                 }
             }
         }
+
 
         public static void updateEvent(Event event) throws SQLException {
             Connection connection = null;
@@ -107,6 +110,12 @@
                 eventStatement.setString(4, event.getEventDescription());
                 eventStatement.setInt(5, event.getEventID());
                 eventStatement.executeUpdate();
+
+                if (event.getEventDescription() == null || event.getEventDescription().isEmpty()) {
+                    eventStatement.setNull(4, Types.VARCHAR);
+                } else {
+                    eventStatement.setString(4, event.getEventDescription());
+                }
 
                 // Delete existing participants for the event
                 String deleteSql = "DELETE FROM participant WHERE eventID=?";

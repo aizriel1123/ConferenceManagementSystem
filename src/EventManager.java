@@ -67,7 +67,6 @@ public class EventManager {
     }
 
     // Method to create a new event
-    // Method to create a new event
     private static void createEvent(Scanner scanner) {
         try {
             System.out.println("+-----------------------------------------+");
@@ -77,6 +76,13 @@ public class EventManager {
             String eventTitle = scanner.nextLine();
             if (eventTitle.isEmpty()) {
                 throw new IllegalArgumentException("Event title cannot be empty.");
+            }
+
+            List<Event> existingEvents = Database.getEvents();
+            for (Event existingEvent : existingEvents) {
+                if (existingEvent.getEventTitle().equalsIgnoreCase(eventTitle)) {
+                    throw new IllegalArgumentException("An event with the same title already exists.");
+                }
             }
 
             System.out.print("Enter Event Date (YYYY-MM-DD): ");
@@ -93,6 +99,10 @@ public class EventManager {
 
             System.out.print("Enter Event Description (optional): ");
             String eventDescription = scanner.nextLine();
+            // If event description is blank, set it to 'none'
+            if (eventDescription == null || eventDescription.trim().isEmpty()) {
+                eventDescription = "none";
+            }
 
             Event event = new Event(eventTitle, eventDate, eventLocation, eventDescription);
 
@@ -118,6 +128,15 @@ public class EventManager {
                         participantEmail = scanner.nextLine();
                     } while (!isValidEmail(participantEmail) && !participantEmail.isEmpty());
 
+                    for (Participant existingParticipant : event.getParticipants()) {
+                        if (existingParticipant.getParticipantName().equalsIgnoreCase(participantName)) {
+                            throw new IllegalArgumentException("Participant with the same name already registered for this event.");
+                        }
+                        if (participantEmail != null && !participantEmail.isEmpty() && participantEmail.equals(existingParticipant.getParticipantEmail())) {
+                            throw new IllegalArgumentException("Participant with the same email already registered for this event.");
+                        }
+                    }
+
                     Participant participant = new Participant(0, participantName, participantEmail);
                     event.addParticipant(participant);
                 } else {
@@ -125,13 +144,25 @@ public class EventManager {
                 }
             }
 
-            Database.addEventData(event);
+            int eventId = Database.addEventData(event); // Capture the generated event ID
             System.out.println("Event successfully saved!");
+
+            // Display created event details
+            System.out.println("Created Event Details:");
+            System.out.println("+----+---------------------+------------+---------------+-------------------+");
+            System.out.println("| ID |      Event Title    |    Date    |    Location   |    Description    |");
+            System.out.println("+----+---------------------+------------+---------------+-------------------+");
+            System.out.printf("| %-3d| %-20s| %-11s| %-14s| %-18s|%n",
+                    eventId, event.getEventTitle(), event.getEventDate(),
+                    event.getEventLocation(), event.getEventDescription());
+            System.out.println("+----+---------------------+------------+---------------+-------------------+");
+
         } catch (IllegalArgumentException | SQLException e) {
             System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
 
 
     // Method to update an event
@@ -148,12 +179,17 @@ public class EventManager {
 
             Event event = Database.getEventByID(eventID);
             if (event != null) {
-                System.out.println("+----+------------------------+");
-                System.out.println("| ID |         Event          |");
-                System.out.println("+----+------------------------+");
-                System.out.printf("| %-3d| %-22s|%n", eventID, event.getEventTitle());
-                System.out.println("+----+------------------------+");
+                // Display event details before update
+                System.out.println("Event Details (Before Update):");
+                System.out.println("+----+---------------------+------------+---------------+-------------------+");
+                System.out.println("| ID |      Event Title    |    Date    |    Location   |    Description    |");
+                System.out.println("+----+---------------------+------------+---------------+-------------------+");
+                System.out.printf("| %-3d| %-20s| %-11s| %-14s| %-18s|%n",
+                        event.getEventID(), event.getEventTitle(), event.getEventDate(),
+                        event.getEventLocation(), event.getEventDescription());
+                System.out.println("+----+---------------------+------------+---------------+-------------------+");
 
+                // Prompt user for updated event details
                 System.out.print("Enter updated Event Title (Press Enter to keep current value): ");
                 String eventTitle = scanner.nextLine();
 
@@ -184,8 +220,19 @@ public class EventManager {
                     event.setEventDescription(eventDescription);
                 }
 
+                // Update event in the database
                 Database.updateEvent(event);
                 System.out.println("Event updated successfully!");
+
+                // Display updated event details
+                System.out.println("Updated Event Details:");
+                System.out.println("+----+---------------------+------------+---------------+-------------------+");
+                System.out.println("| ID |      Event Title    |    Date    |    Location   |    Description    |");
+                System.out.println("+----+---------------------+------------+---------------+-------------------+");
+                System.out.printf("| %-3d| %-20s| %-11s| %-14s| %-18s|%n",
+                        event.getEventID(), event.getEventTitle(), event.getEventDate(),
+                        event.getEventLocation(), event.getEventDescription());
+                System.out.println("+----+---------------------+------------+---------------+-------------------+");
             } else {
                 System.out.println("Event not found!");
             }
@@ -197,14 +244,18 @@ public class EventManager {
 
 
 
-
     // Method to delete an event
     private static void deleteEvent(Scanner scanner) {
         try {
             System.out.println("+-----------------------------------------+");
             System.out.println("|             Delete Event                |");
             System.out.println("+-----------------------------------------+");
-            System.out.println("Enter the ID of the event you want to delete:");
+            System.out.println("Enter the ID of the event you want to delete (type 'exit' to cancel):");
+            String userInput = scanner.nextLine().trim();
+            if (userInput.equalsIgnoreCase("exit")) {
+                System.out.println("Delete event operation canceled.");
+                return; // Exit the method
+            }
             displayEventTable(Database.getEvents());
             System.out.print("Choose an option: ");
             int eventID = scanner.nextInt();
@@ -315,29 +366,32 @@ public class EventManager {
                     throw new IllegalArgumentException("Participant name cannot be empty.");
                 }
 
+                // Check if participant name already exists for the event
+                for (Participant existingParticipant : event.getParticipants()) {
+                    if (existingParticipant.getParticipantName().equalsIgnoreCase(participantName)) {
+                        throw new IllegalArgumentException("Participant with the same name already registered for this event.");
+                    }
+                }
+
                 System.out.print("Enter Participant Email (optional): ");
                 String participantEmail = scanner.nextLine();
                 if (!participantEmail.isEmpty() && !isValidEmail(participantEmail)) {
                     throw new IllegalArgumentException("Invalid email format. Please enter a valid email or leave it empty.");
                 }
 
-                // Check if the participant is already registered for the event
-                List<Participant> existingParticipants = event.getParticipants();
-                for (Participant participant : existingParticipants) {
-                    if (participant.getParticipantName().equalsIgnoreCase(participantName)) {
-                        System.out.println("Participant with the same name already registered for this event.");
-                        return;
+                // Check if participant email already exists for the event
+                if (participantEmail != null && !participantEmail.isEmpty()) {
+                    for (Participant existingParticipant : event.getParticipants()) {
+                        if (participantEmail.equals(existingParticipant.getParticipantEmail())) {
+                            throw new IllegalArgumentException("Participant with the same email already registered for this event.");
+                        }
                     }
                 }
 
-                // Create Participant object
                 Participant participant = new Participant(0, participantName, participantEmail);
 
-                // Call addParticipant function
-                int participantID = Database.addParticipant(participant); // Update to get the participantID
-
-                // Add participant to event and update event participants
-                participant.setParticipantID(participantID); // Set the participantID
+                int participantID = Database.addParticipant(participant);
+                participant.setParticipantID(participantID);
                 event.addParticipant(participant);
                 Database.updateEventParticipants(eventID, event.getParticipants());
                 System.out.println("Participant registered successfully!");
@@ -366,14 +420,13 @@ public class EventManager {
 
             Event event = Database.getEventByID(eventID);
             if (event != null) {
-                displayEventDetails(event);
+                displayParticipantsTable(event.getParticipants());
                 System.out.print("Enter the ID of the participant you want to remove: ");
                 int participantID = scanner.nextInt();
                 scanner.nextLine(); // Consume newline
 
-                // Call deleteParticipant function
+
                 if (Database.deleteParticipant(participantID)) {
-                    // Remove participant from the event and update event participants
                     event.removeParticipant(participantID);
                     Database.updateEventParticipants(eventID, event.getParticipants());
                     System.out.println("Participant removed successfully!");
@@ -388,6 +441,7 @@ public class EventManager {
             e.printStackTrace();
         }
     }
+
 
     // Method to search for an event
     private static void searchEvent(Scanner scanner) {
